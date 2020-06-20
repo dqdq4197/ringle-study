@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+import React,{useEffect,useState, useRef, useCallback, useMemo} from 'react';
 import Script from '../../components/Review/Script';
 import Suggestions from '../../components/Review/Suggestions';
 import Feedback from '../../components/Review/Feedback';
@@ -11,19 +11,27 @@ import {RootState} from '../../modules/index';
 const MainContainer = () => {
     const {dialog, url} = useSelector((state:RootState) =>  state.script);
     const dispatch = useDispatch();
+    const currentRef = useRef<HTMLAudioElement>()
 
     useEffect(() => {
         dispatch(getScriptsThunk());
-        console.log('a')
     },[])
 
+    
     return (
         <>
             <div style={{flex:"1.5 1", paddingLeft:"30px", paddingRight:"30px"}}>
                 <div style={{position:"relative", display:"flex", height:"100%"}}>
-                    <Script dialog={dialog} url={url}/>
+                    <Script 
+                        dialog={dialog} 
+                        currentRef={currentRef}
+                    />
                     <Suggestions/>
-                    <AudioPlayer/>
+                    <AudioPlayer 
+                        currentRef={currentRef} 
+                        url={url}
+
+                    />
                 </div>
             </div>
             <div style={{width: "1px", height: "100%", backgroundColor: "#f3f3f3"}}/>

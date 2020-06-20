@@ -111,9 +111,9 @@ type StyledProps = {
 }
 type ScriptProps = {
     dialog:DialogType[],
-    url:string,
+    currentRef?:React.MutableRefObject<any>,
 }
-const Script = ({dialog,url}:ScriptProps) => {
+const Script = ({dialog,currentRef}:ScriptProps) => {
     return (
         <ScriptBlock>
             <div className="record_menu">
@@ -129,7 +129,7 @@ const Script = ({dialog,url}:ScriptProps) => {
             <DialogContainer>
                 {dialog.map(v => {
                    return (
-                        <ChatContainer identity={v.role} >
+                        <ChatContainer key={v.id} identity={v.role} >
                             {v.role ? <img className="profile_picture" src={v.image_url} alt=""/> : null}
                             <div className="chat_text">{v.content}</div>
                             <span className="time">{v.formatted_time}</span>
