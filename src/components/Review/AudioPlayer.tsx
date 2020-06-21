@@ -1,6 +1,5 @@
-import React, {useState} from 'react';
-import styled from 'styled-components';
-import {debounce} from 'lodash';
+import React, {useState,useEffect} from 'react';
+import styled from 'styled-components'; 
 
 const AudioBlock = styled.div`
     position:absolute;
@@ -66,6 +65,7 @@ const AudioPlayer = ({url,currentRef}:AudioType) => {
     const [endTime, setEndTime] = useState("00:00");
     const [value, setValue] = useState(0);
     const [isPause, setIsPause] = useState(true);
+    const [timer, setTimer] = useState(0);
     //event  -> e.tartget.duration // 
 
     const formatTime = (time:number) => {
@@ -76,39 +76,55 @@ const AudioPlayer = ({url,currentRef}:AudioType) => {
         seconds = (seconds >= 10) ? seconds : "0" + seconds;
         return minutes + ":" + seconds;
     }
-
+    // useEffect(() => {
+    //     const onUpdateTime = () => {
+    //         let audio = currentRef.current;
+    //         if(audio) {
+    //             setStartTime(formatTime(audio.currentTime))
+    //             if(!isNaN(audio.duration))
+    //                 setValue(1/audio.duration * audio.currentTime)
+    //         }
+    //     }
+    //     currentRef.current.addEventListener("timeupdate", onUpdateTime);
+    //     let range =  document.getElementById("range")
+    //     if(range)
+    //     range.addEventListener("change", () => {
+    //         currentRef.current.removeEventListener("timeupdate", onUpdateTime);
+    //     })  
+    // })
     const onChangeEndTime = () => {
         if(currentRef.current)
             setEndTime(formatTime(currentRef.current.duration));
     }
 
-    const onUpdateTime = () => {
-        let audio = currentRef.current;
-        if(audio) {
-            setStartTime(formatTime(audio.currentTime))
-            if(!isNaN(audio.duration))
-                setValue(1/audio.duration * audio.currentTime)
-        }
-    }
     
-    //디바운스 직접 구현 
+    
     const onChangeRange = (text:string) => {
         if(currentRef.current) {
+            
             setValue(Number(text));
             setStartTime(formatTime(Number(text) * currentRef.current.duration));
+            
+            // 오디오 디바운싱
+            if(timer) {
+                clearTimeout(timer)
+            }
+            setTimer(setTimeout(() => {
+                currentRef.current.currentTime = Number(text) * currentRef.current.duration
+                console.log('debounce')
+            },300))
+            
         }
-        debounce(() => {
-            // currentRef.current.currentTime = text;
-            console.log('a');
-        }, 100)
     }
 
     const prevHandler = () => {
-        if(currentRef.current)
+        if(currentRef.current){
             currentRef.current.currentTime -= 5;
-    }
+            // return currentRef.current.removeEventListener("timeupdate",onUpdateTime);
+    }}
     const startHandler = () => {
         let audio = currentRef.current;
+        
         if(audio)
             if(!isPause) {
                 audio.pause();
@@ -116,8 +132,8 @@ const AudioPlayer = ({url,currentRef}:AudioType) => {
             } else {
                 audio.play();
                 setIsPause(false);
+                // audio.addEventListener("timeupdate", onUpdateTime )
             }
-            
     }
     const nextHandler = () => {
         if(currentRef.current)
@@ -126,8 +142,8 @@ const AudioPlayer = ({url,currentRef}:AudioType) => {
 
     return (
         <AudioBlock>
-            <input min="0" max="1" step="any" className="range" type="range" value={value} onChange={(e) => onChangeRange(e.target.value)}/>
-            <audio preload="auto" src={url} ref={currentRef} onLoadedData={onChangeEndTime} onTimeUpdate={onUpdateTime}></audio>
+            <input id="range" min="0" max="1" step="any" className="range" type="range" value={value} onChange={(e) => onChangeRange(e.target.value)}/>
+            <audio preload="auto" src={url} ref={currentRef} onLoadedData={onChangeEndTime} ></audio>
             <TimeBar>
                 <span className="audio_time start_time">{startTime}</span>
                 <span className="audio_time end_time">{endTime}</span>
