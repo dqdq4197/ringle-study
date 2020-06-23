@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useRef,useEffect} from 'react';
 import styled,{css} from 'styled-components';
 import {DialogType} from '../../modules/ReviewScript';
 
@@ -49,12 +49,13 @@ const ScriptBlock = styled.div`
         
     }
 `
+
+//중복
 const DialogContainer = styled.div`
         height:calc(100% - 150px);
         overflow-y:scroll;
         &::-webkit-scrollbar {
             display:none;
-            
         }
         
 `
@@ -111,9 +112,27 @@ type StyledProps = {
 }
 type ScriptProps = {
     dialog:DialogType[],
-    currentRef?:React.MutableRefObject<any>,
+    onSelectScript:(time:number) => void,
+    seekTime:number,
+    AutoScrollHandler:(event: React.ChangeEvent<HTMLInputElement>) => void,
+    isAuto:boolean,
 }
-const Script = ({dialog,currentRef}:ScriptProps) => {
+const Script = ({dialog,onSelectScript,seekTime,AutoScrollHandler,isAuto}:ScriptProps) => {
+
+    const containerRef = useRef<HTMLDivElement>(null) 
+    const scriptRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        if(isAuto)
+            scrollMove() 
+    },[seekTime])
+    
+    const scrollMove = () => {
+        if(containerRef.current && scriptRef.current)
+        containerRef.current.scrollTo({
+          top: scriptRef.current.offsetTop- 380,
+          behavior: 'smooth'
+        });
+    }
     return (
         <ScriptBlock>
             <div className="record_menu">
@@ -122,20 +141,27 @@ const Script = ({dialog,currentRef}:ScriptProps) => {
                 <span className="question_icon">?</span>
                 <form action="" className="autoForm">
                     <label htmlFor="autoScroll">Auto Scroll</label>
-                    <input id="autoScroll" type="checkbox" />
+                    <input id="autoScroll" type="checkbox" onChange={AutoScrollHandler} />
                 </form>
             </div>
             <div className="line"></div>
-            <DialogContainer>
-                {dialog.map(v => {
-                   return (
-                        <ChatContainer key={v.id} identity={v.role} >
-                            {v.role ? <img className="profile_picture" src={v.image_url} alt=""/> : null}
-                            <div className="chat_text">{v.content}</div>
-                            <span className="time">{v.formatted_time}</span>
-                        </ChatContainer>
-                    )
-                })}
+            <DialogContainer ref={containerRef}>
+               {dialog.map((v,i) => {
+            return (
+                (v.formatted_time_to_milliseconds <= seekTime ) && ((seekTime < dialog[i+1].formatted_time_to_milliseconds) || seekTime < v.formatted_end_time_to_milliseconds) ? 
+                 <ChatContainer key={v.id} ref={scriptRef} onClick={() => onSelectScript(v.formatted_time_to_milliseconds)} identity={v.role} >
+                     {v.role ? <img className="profile_picture" src={v.image_url} alt="profile picture"/> : null}
+                     <div className="chat_text" style={{opacity:1}}>{v.content}</div>
+                     <span className="time">{v.formatted_time}</span>
+                 </ChatContainer>
+                 : 
+                 <ChatContainer key={v.id} onClick={() => onSelectScript(v.formatted_time_to_milliseconds)} identity={v.role} >
+                 {v.role ? <img className="profile_picture" src={v.image_url} alt="profile picture"/> : null}
+                 <div className="chat_text">{v.content}</div>
+                 <span className="time">{v.formatted_time}</span>
+             </ChatContainer>
+             )
+         })}
             </DialogContainer>
         </ScriptBlock>
     )

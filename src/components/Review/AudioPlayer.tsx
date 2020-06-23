@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from 'react';
+import React from 'react';
 import styled from 'styled-components'; 
 
 const AudioBlock = styled.div`
@@ -54,113 +54,47 @@ const ControllBar = styled.div`
         }
     }
 `
+type TControllButton = {
+    buttonSrc: string[],
+    buttonHandler:() => void,
+    alt:string,
+}
 type AudioType = {
     url:string,
-    currentRef:React.MutableRefObject<any>,
+    currentRef:React.RefObject<HTMLAudioElement>,
+    rangeRef: React.RefObject<HTMLInputElement>,
+    value:number,
+    changeRange:(value:string) => void,
+    controllButton:TControllButton[],
+    rangeMouseUp:() => void,
+    loadedEndTime:() => void,
+    startTime:string,
+    endTime:string,
+    isPause:boolean,
 }
-const AudioPlayer = ({url,currentRef}:AudioType) => {
+const AudioPlayer = ({url,currentRef,rangeRef,value,changeRange,controllButton,rangeMouseUp, loadedEndTime, startTime, endTime,isPause}:AudioType) => {
     
-    
-    const [startTime,setStartTime] = useState("00:00");
-    const [endTime, setEndTime] = useState("00:00");
-    const [value, setValue] = useState(0);
-    const [isPause, setIsPause] = useState(true);
-    const [timer, setTimer] = useState(0);
-    //event  -> e.tartget.duration // 
-
-    const formatTime = (time:number) => {
-        let minutes, seconds;
-        minutes = Math.floor(time / 60);
-        minutes = (minutes >= 10) ? minutes : "0" + minutes;
-        seconds = Math.floor(time % 60);
-        seconds = (seconds >= 10) ? seconds : "0" + seconds;
-        return minutes + ":" + seconds;
-    }
-    // useEffect(() => {
-    //     const onUpdateTime = () => {
-    //         let audio = currentRef.current;
-    //         if(audio) {
-    //             setStartTime(formatTime(audio.currentTime))
-    //             if(!isNaN(audio.duration))
-    //                 setValue(1/audio.duration * audio.currentTime)
-    //         }
-    //     }
-    //     currentRef.current.addEventListener("timeupdate", onUpdateTime);
-    //     let range =  document.getElementById("range")
-    //     if(range)
-    //     range.addEventListener("change", () => {
-    //         currentRef.current.removeEventListener("timeupdate", onUpdateTime);
-    //     })  
-    // })
-    const onChangeEndTime = () => {
-        if(currentRef.current)
-            setEndTime(formatTime(currentRef.current.duration));
-    }
-
-    
-    
-    const onChangeRange = (text:string) => {
-        if(currentRef.current) {
-            
-            setValue(Number(text));
-            setStartTime(formatTime(Number(text) * currentRef.current.duration));
-            
-            // 오디오 디바운싱
-            if(timer) {
-                clearTimeout(timer)
-            }
-            setTimer(setTimeout(() => {
-                currentRef.current.currentTime = Number(text) * currentRef.current.duration
-                console.log('debounce')
-            },300))
-            
-        }
-    }
-
-    const prevHandler = () => {
-        if(currentRef.current){
-            currentRef.current.currentTime -= 5;
-            // return currentRef.current.removeEventListener("timeupdate",onUpdateTime);
-    }}
-    const startHandler = () => {
-        let audio = currentRef.current;
-        
-        if(audio)
-            if(!isPause) {
-                audio.pause();
-                setIsPause(true);
-            } else {
-                audio.play();
-                setIsPause(false);
-                // audio.addEventListener("timeupdate", onUpdateTime )
-            }
-    }
-    const nextHandler = () => {
-        if(currentRef.current)
-            currentRef.current.currentTime += 5;
-    }
-
+  
     return (
         <AudioBlock>
-            <input id="range" min="0" max="1" step="any" className="range" type="range" value={value} onChange={(e) => onChangeRange(e.target.value)}/>
-            <audio preload="auto" src={url} ref={currentRef} onLoadedData={onChangeEndTime} ></audio>
+            <input id="range" min="0" max="1" step="any" className="range" type="range" onMouseUp={rangeMouseUp} value={value} ref={rangeRef} onChange={(e) =>{changeRange(e.target.value); }}/>
+            <audio preload="auto" src={url} ref={currentRef} onLoadedData={loadedEndTime} ></audio>
             <TimeBar>
                 <span className="audio_time start_time">{startTime}</span>
                 <span className="audio_time end_time">{endTime}</span>
             </TimeBar>
             <ControllBar>
-                <button onClick={prevHandler}>
-                    <img src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-prev-5s.png" alt="Prev"/>
-                </button>
-                <button onClick={startHandler} className="startBtn">
-                    {isPause 
-                    ? <img src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-play.png" alt="Play"/>
-                    : <img style={{width:20}} src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-pause.png" alt="Pouse" />
-                    }
-                </button>
-                <button onClick={nextHandler}>
-                    <img src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-next-5s.png" alt="Next"/>
-                </button>
+                {controllButton.map((btn,index) => {
+                    return index === 1 ? 
+                        <button onClick={btn.buttonHandler} className="startBtn" key={btn.buttonSrc[0]}> {isPause ? 
+                            <img src={btn.buttonSrc[0]} alt={btn.alt}/> :
+                            <img style={{width:20}} src={btn.buttonSrc[1]} alt={btn.alt}/>
+                        }
+                        </button>
+                        :<button onClick={btn.buttonHandler} key={btn.buttonSrc[0]}>
+                            <img src={btn.buttonSrc[0]} alt={btn.alt}/>
+                        </button>
+                })}
             </ControllBar>
         </AudioBlock>
     )

@@ -43,7 +43,7 @@ const MainBlock = styled.div`
     position:relative;
     display:flex;
     width: calc(100% - 60px);
-    height:92%;
+    height:90%;
     
 `
 

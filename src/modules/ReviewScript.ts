@@ -1,6 +1,10 @@
 import axios from 'axios';
 
 const GETSCRIPTS = 'script/GETSCRIPTS' as const;
+const SELECTSCRIPT = 'script/SELECTSCRIPT' as const;
+const CHANGERANGE = 'script/CHANGERANGE' as const;
+const ONAUTOSCROLL = 'script/ONAUTOSCROLL' as const;
+
 
 const getScript = (data:ScriptProps) => {
     return {
@@ -12,9 +16,29 @@ const getScript = (data:ScriptProps) => {
     }
 }
 
+export const selectScript = (time:number) => {
+    return {
+        type: SELECTSCRIPT,
+        payload: time,
+    }
+}
+
+export const changeRange = (time:number) => {
+    return {
+        type: CHANGERANGE,
+        payload: time,
+    }
+}
+
+
+// suggestion func 
+
+
 
 type ScriptAction =
     | ReturnType<typeof getScript>
+    | ReturnType<typeof selectScript>
+    | ReturnType<typeof changeRange>
 
 export type DialogType = {
     content: string
@@ -28,14 +52,19 @@ export type DialogType = {
     start_time: string
 }
 
-interface ScriptProps {
+type ScriptProps = {
     dialog_array:DialogType[],
     url:string,
 }
 
+
+
+
 type InitialType = {
     dialog: DialogType[],
     url:string,
+    seekTime:number,
+    isStart:boolean,
 }
 
 export const getScriptsThunk = () => {
@@ -51,9 +80,13 @@ export const getScriptsThunk = () => {
     
 }
 
+
+
 const initialState:InitialType = {
     dialog:[],
     url:"",
+    seekTime:0,
+    isStart:false,
 }
 
 export default function script(state:InitialType = initialState, action:ScriptAction) {
@@ -63,6 +96,16 @@ export default function script(state:InitialType = initialState, action:ScriptAc
                 ...state,
                 dialog:action.payload.dialog,
                 url:action.payload.url,
+            }
+        case SELECTSCRIPT :
+            return {
+                ...state,
+                seekTime:action.payload,
+            }
+        case CHANGERANGE :
+            return {
+                ...state,
+                seekTime:action.payload,
             }
         default : 
             return state
