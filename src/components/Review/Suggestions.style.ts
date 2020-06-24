@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled,{css} from 'styled-components';
 
 const MenuTitle = styled.div`
     ${({theme}) => theme.flexBox};
@@ -74,6 +74,56 @@ const SuggestionLike = styled.div`
         width:26px;
     }
 `
+const BtnFont = css`
+    font-size: 11px;
+    text-align: center;
+    cursor: pointer;
+`
+const WordList = styled.div`
+    ${({theme}) => theme.flexBox};
+    ${BtnFont}
+    margin-top:10px;
+    color: ${({theme}) =>theme.accentColor};
+    text-decoration: underline;
+    img {
+        width:16px;
+        margin-left:3px;
+    }
+`
+const SuggestionSubBox = styled.li`
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    .suggestion-word {
+        font-size: 11px;
+        line-height: 1.64;
+        color: #9b9b9b
+    }
+`
+
+const SuggestionButton = styled.button`
+    border-radius: 3px;
+    background: ${({theme}) => theme.accentColor};
+    color: #fff;
+    padding: 6px 12px;
+    margin-top:10px;
+    border:none;
+    ${BtnFont}
+`
+const SynonymWordBox = styled.li`
+    display:flex;
+    justify-content: space-between;
+    margin-top:10px;
+    cursor:pointer;
+    .word {
+        font-size: 14px;
+        line-height: 1.64;
+        color: #9b9b9b;
+    }
+    img {
+        width:16px;
+    }
+`
 
 export {
     MenuTitle,
@@ -83,5 +133,10 @@ export {
     SuggestionBox,
     SuggestionContentBox,
     SuggestionFeedbackText,
-    SuggestionLike
+    SuggestionLike,
+    WordList,
+    SuggestionSubBox,
+    SuggestionButton,
+    SynonymWordBox
+
 }

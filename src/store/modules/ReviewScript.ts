@@ -1,9 +1,10 @@
-import axios from 'axios';
+import { ThunkAction } from 'redux-thunk';
+import {RootState} from '.';
+import {getScriptAPI} from '../apis/review';
 
 const GETSCRIPTS = 'script/GETSCRIPTS' as const;
 const SELECTSCRIPT = 'script/SELECTSCRIPT' as const;
 const CHANGERANGE = 'script/CHANGERANGE' as const;
-const ONAUTOSCROLL = 'script/ONAUTOSCROLL' as const;
 
 
 const getScript = (data:ScriptProps) => {
@@ -52,7 +53,7 @@ export type DialogType = {
     start_time: string
 }
 
-type ScriptProps = {
+export type ScriptProps = {
     dialog_array:DialogType[],
     url:string,
 }
@@ -67,15 +68,15 @@ type InitialType = {
     isStart:boolean,
 }
 
-export const getScriptsThunk = () => {
-    return (dispatch:any) => {
-        axios.get("https://www.ringleplus.com/api/v3/student/lesson_record/test/script")
-        .then((res) => {
-            dispatch(getScript(res.data))
-        })
-        .catch(err => {
-            console.log(err.error);
-        })
+export const getScriptsThunk = ():ThunkAction<void,RootState,null,ScriptAction> => {
+    return async(dispatch) => {
+        try {
+            const data = await getScriptAPI()
+            dispatch(getScript(data))
+        }
+        catch (e) {
+            console.log(e.error)
+        }
     }
     
 }

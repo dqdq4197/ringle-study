@@ -1,6 +1,6 @@
-import axios from 'axios';
-
-
+import { ThunkAction } from 'redux-thunk';
+import {RootState} from '.';
+import {getSuggestionAPI} from '../apis/review';
 
 const GETSUGGESTIONS = 'suggestion/GETSUGGESTIONS' as const;
 
@@ -16,7 +16,7 @@ const getSuggestions = (data:InitialType) => {
 
 
 
-type ScriptAction =
+type SuggestionAction =
     | ReturnType<typeof getSuggestions>
 
 
@@ -27,27 +27,18 @@ type synonymType = {
 }
 export type SynonymListType = {
     synonyms:synonymType[],
-    voca_record:synonymType[],
+    voca_record:synonymType,
 }
 
-export const getSuggestionsThunk = () => {
-    return (dispatch:any) => {
-        axios.get("https://www.ringleplus.com/api/v3/student/lesson_record/test/suggestions")
-        .then((res) => {
-            let data:InitialType = {
-                filler_word_message:res.data.filler_word_message,
-                filler_word_percent:res.data.filler_word_percent,
-                list_top_50:res.data.list_top_50,
-                message:res.data.message,
-                sub_message:res.data.sub_message,
-                success:res.data.success,
-                synonym_list:res.data.synonym_list,
-            }
+export const getSuggestionsThunk = ():ThunkAction<void,RootState,null,SuggestionAction> => {
+    return async(dispatch) => {
+        try {
+            const data = await getSuggestionAPI()
             dispatch(getSuggestions(data))
-        })
-        .catch(err => {
-            console.log(err.error);
-        })
+        }
+        catch (e) {
+            console.log(e.error);
+        }
     }
 }
 
@@ -72,7 +63,7 @@ const initialState:InitialType = {
 }
 
 
-export default function suggestion(state:InitialType = initialState, action:ScriptAction) {
+export default function suggestion(state:InitialType = initialState, action:SuggestionAction) {
     switch (action.type) {
         case GETSUGGESTIONS :
             return action.payload

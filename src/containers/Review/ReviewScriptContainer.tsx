@@ -1,12 +1,14 @@
 import React,{useEffect,useState, useRef, useCallback} from 'react';
+import styled from 'styled-components';
 import Script from '../../components/Review/Script';
 import Suggestions from '../../components/Review/Suggestions';
 import AudioPlayer from '../../components/Review/AudioPlayer';
-import {getScriptsThunk, selectScript, changeRange} from '../../modules/ReviewScript';
-import {getSuggestionsThunk} from '../../modules/ReviewSuggestions';
+import {getScriptsThunk, selectScript, changeRange} from '../../store/modules/ReviewScript';
+import {getSuggestionsThunk} from '../../store/modules/ReviewSuggestions';
 import {useDispatch, useSelector} from 'react-redux';
-import {RootState} from '../../modules/index';
+import {RootState} from '../../store/modules/index';
 import storage from '../../lib/storage';
+
 type TControllButton = {
     buttonSrc: string[],
     buttonHandler:() => void,
@@ -23,6 +25,9 @@ const MainContainer = () => {
     const [isPause, setIsPause] = useState(true);
     const [repeat, setRepeat] = useState(0);  
     const [value, setValue] = useState(0);
+
+ 
+
     const currentRef = useRef<HTMLAudioElement>(null);
     const rangeRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +38,7 @@ const MainContainer = () => {
     useEffect(() => {
         dispatch(getScriptsThunk());
         dispatch(getSuggestionsThunk());
-    },[])
+    },[dispatch])
     
     
     const formatTime = (time:number) => {
@@ -47,28 +52,28 @@ const MainContainer = () => {
     const onAutoScrollHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         storage.set("AutoScroll", event.target.checked);
     }
-    const onChangeSeek = useCallback((time:number) => {
+    const onChangeSeek = (time:number) => {
         dispatch(changeRange(time))
-    },[]);
+    }
 
-    const onLoadedEndTime = () => {
+    const onLoadedEndTime = useCallback(() => {
         if(currentRef.current) {
             setEndTime(formatTime(currentRef.current.duration));
         }
-    }
+    },[])
 
-    const onChangeRange = (value:string) => {
+    const onChangeRange = useCallback((value:string) => {
         if(currentRef.current) {
             setValue(Number(value));
             setStartTime(formatTime(Number(value) * currentRef.current.duration));
         }
-    }
-    const rangeMouseUp = () => {
+    },[])
+    const rangeMouseUp = useCallback(() => {
         if(currentRef.current && rangeRef.current){
             currentRef.current.currentTime=Number(rangeRef.current.value) * currentRef.current.duration;
             onChangeSeek(Number(rangeRef.current.value) * currentRef.current.duration);
         }
-    }
+    },[onChangeSeek])
 
     const onSelectScript = useCallback((time:number) => {
         dispatch(selectScript(time));
@@ -77,7 +82,7 @@ const MainContainer = () => {
             setValue(1/currentRef.current.duration * time);
             setStartTime(formatTime(Number(time)))
         }
-    },[]);
+    },[dispatch]);
     
     const makeControllButton = ():TControllButton[] => [
         { // 5초 전
@@ -131,35 +136,45 @@ const MainContainer = () => {
         }
     ]
     return (
-        <>
-            <div style={{flex:"1.5 1", paddingLeft:"30px", paddingRight:"30px"}}>
-                <div style={{position:"relative", display:"flex", height:"100%"}}>
-                    <Script 
-                        dialog={dialog}
-                        onSelectScript={onSelectScript}
-                        seekTime={seekTime}
-                        AutoScrollHandler={onAutoScrollHandler}
-                        isAuto={isAuto}
-                    />
-                    <Suggestions/>
-                    <AudioPlayer 
-                        currentRef={currentRef} 
-                        rangeRef={rangeRef}
-                        value={value}
-                        url={url}
-                        changeRange={onChangeRange}
-                        controllButton={makeControllButton()}
-                        rangeMouseUp={rangeMouseUp}
-                        loadedEndTime={onLoadedEndTime}
-                        startTime={startTime}    
-                        endTime={endTime}
-                        isPause={isPause}
-
-                    />
-                </div>
-            </div>
-        </>
+        <ScriptContainer>
+            <ScriptWrap>
+                <Script 
+                    dialog={dialog}
+                    onSelectScript={onSelectScript}
+                    seekTime={seekTime}
+                    AutoScrollHandler={onAutoScrollHandler}
+                    isAuto={isAuto}
+                />
+                <Suggestions/>
+                <AudioPlayer 
+                    currentRef={currentRef} 
+                    rangeRef={rangeRef}
+                    value={value}
+                    url={url}
+                    changeRange={onChangeRange}
+                    controllButton={makeControllButton()}
+                    rangeMouseUp={rangeMouseUp}
+                    loadedEndTime={onLoadedEndTime}
+                    startTime={startTime}    
+                    endTime={endTime}
+                    isPause={isPause}
+                />
+            </ScriptWrap>
+        </ScriptContainer>
     )
 }
+
+
+const ScriptContainer = styled.div`
+    flex: 1.5 1;
+    padding:0 30px;
+`
+const ScriptWrap = styled.div`
+    position:relative;
+    display:flex;
+    height:100%;
+    
+`
+
 
 export default MainContainer;

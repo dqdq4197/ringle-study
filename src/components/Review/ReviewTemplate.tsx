@@ -2,24 +2,20 @@ import React from 'react';
 import styled from 'styled-components';
 
 
-const TemplateBlock = styled.div`
+const TemplateBlock = styled.main`
     position:absolute;
     width:100%;
     height:100%;
 `
 
-const flexBox = `
-    display:flex;
-    align-items:center;
-`
 const HeaderBlock = styled.header`
-    ${flexBox};
+    ${({theme}) => theme.flexBox};
     padding:28px 0 28px 30px;
     .icon {
         width:20px;
     }
     .title-container {
-        ${flexBox};
+        ${({theme}) => theme.flexBox};
         .title {
             margin-left:8px;
             font-weight:600;
@@ -28,7 +24,7 @@ const HeaderBlock = styled.header`
         }
     }
     .date-container {
-        ${flexBox};
+        ${({theme}) => theme.flexBox};
         margin-left:15px;
         .date {
             margin-left:6px;
@@ -43,7 +39,7 @@ const MainBlock = styled.div`
     position:relative;
     display:flex;
     width: calc(100% - 60px);
-    height:90%;
+    height:calc(100vh - 88px);
     
 `
 
