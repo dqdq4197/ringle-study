@@ -2,6 +2,34 @@ import React from 'react';
 import styled from 'styled-components';
 
 
+
+
+type TemplateProps = {
+    children: React.ReactNode;
+}
+
+const ReviewTemplate = ({children}:TemplateProps) => {
+    return (
+        <TemplateBlock>
+            <HeaderBlock>
+                <div className="title-container">
+                    <img className="icon" src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-past-back.png" alt="icon"/>
+                    <span className="title">What are you getting into it? – Notes from a start-up founder: Immersion and concentration</span>
+                </div>
+                <div className="date-container">
+                    <img className="icon" src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-calendar.png" alt="icon"/>
+                    <span className="date">'20년 5월 23일 11:00 PM (Seoul)</span>
+                </div>
+            </HeaderBlock>
+            <MainBlock>
+                {children}
+            </MainBlock>
+
+        </TemplateBlock>
+
+    )
+}
+
 const TemplateBlock = styled.main`
     position:absolute;
     width:100%;
@@ -42,30 +70,4 @@ const MainBlock = styled.div`
     height:calc(100vh - 88px);
     
 `
-
-type TemplateProps = {
-    children: React.ReactNode;
-}
-const ReviewTemplate = ({children}:TemplateProps) => {
-    return (
-        <TemplateBlock>
-            <HeaderBlock>
-                <div className="title-container">
-                    <img className="icon" src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-past-back.png" alt="icon"/>
-                    <span className="title">What are you getting into it? – Notes from a start-up founder: Immersion and concentration</span>
-                </div>
-                <div className="date-container">
-                    <img className="icon" src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-calendar.png" alt="icon"/>
-                    <span className="date">'20년 5월 23일 11:00 PM (Seoul)</span>
-                </div>
-            </HeaderBlock>
-            <MainBlock>
-                {children}
-            </MainBlock>
-
-        </TemplateBlock>
-
-    )
-}
-
 export default ReviewTemplate;

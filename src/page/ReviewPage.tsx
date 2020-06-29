@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import ReviewScriptContainer from '../containers/Review/ReviewScriptContainer';
+import ReviewMainContainer from '../containers/Review/ReviewMainContainer';
 import ReviewDetailContainer from '../containers/Review/ReviewDetailContainer';
 import ReviewTemplate from '../components/Review/ReviewTemplate';
 
@@ -13,7 +13,7 @@ const VerticalLine = styled.div`
 const ReviewPage = () => {
     return (
         <ReviewTemplate>
-            <ReviewScriptContainer/>
+            <ReviewMainContainer/>
             <VerticalLine/>
             <ReviewDetailContainer/>
         </ReviewTemplate>

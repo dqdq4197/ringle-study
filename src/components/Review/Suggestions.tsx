@@ -5,11 +5,7 @@ import {RootState} from '../../store/modules';
 import * as S from './Suggestions.style';
 import QuestionMark from '../Common/QuestionMark';
 
-const SuggestionBlock = styled.div`
-    flex:1;
-    margin-left: 60px;
-    max-width: 40%;
-`
+
 
 type SuggestionType = {
 }
@@ -34,9 +30,11 @@ const Suggestions = ({}:SuggestionType) => {
                 <img className="icon" src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-suggestion.png" alt="Suggestion"/>
                 <span className="text">Suggestions</span>
                 <QuestionMark
-                    desctiption={<>내가 주로 말하는 단어에 대한 원어민 사용 빈도 수, 동의어 및 Filler Word 분석 데이터를 제공합니다. Filler Word는 like, um과 같이 의미 없이 문장에서 사용되는 단어들을 말합니다.
+                    desctiption={<>
+                        내가 주로 말하는 단어에 대한 원어민 사용 빈도 수, 동의어 및 Filler Word 분석 데이터를 제공합니다. Filler Word는 like, um과 같이 의미 없이 문장에서 사용되는 단어들을 말합니다.
                         주로 사용한 단어의 동의어를 확인하고, 다음 수업에서 활용해보세요.<br/>
-                        Filler Word의 수치(%)는 한 문장을 발화할 때, Filler word를 한번 이상 사용할 확률을 의미합니다. 권장값은 약 30% 내 입니다.</>}
+                        Filler Word의 수치(%)는 한 문장을 발화할 때, Filler word를 한번 이상 사용할 확률을 의미합니다. 권장값은 약 30% 내 입니다.
+                    </>}
                 />
             </S.MenuTitle>
             <S.Line/>
@@ -110,5 +108,11 @@ const Suggestions = ({}:SuggestionType) => {
         </SuggestionBlock>
     )
 }
+
+const SuggestionBlock = styled.div`
+    flex:1;
+    margin-left: 60px;
+    max-width: 40%;
+`
 
 export default Suggestions;

@@ -1,6 +1,55 @@
 import React from 'react';
 import styled from 'styled-components'; 
 
+
+type TControllButton = {
+    buttonSrc: string[],
+    buttonHandler:() => void,
+    alt:string,
+}
+type AudioType = {
+    url:string,
+    audioRef:React.RefObject<HTMLAudioElement>,
+    rangeInputRef: React.RefObject<HTMLInputElement>,
+    value:number,
+    startTime:string,
+    endTime:string,
+    isPause:boolean,
+    AudioControllButtons:TControllButton[],
+    onSliderChange:(value:string) => void,
+    onSliderMouseUp:() => void,
+    onAudioload:() => void,
+}
+
+const AudioPlayer = ({ url, audioRef, rangeInputRef, value, startTime,  endTime, isPause,  AudioControllButtons, onSliderMouseUp,  onAudioload,  onSliderChange}:AudioType) => {
+    
+  
+    return (
+        <AudioBlock>
+            <input id="range" min="0" max="1" step="any" className="range" type="range" onMouseUp={onSliderMouseUp} value={value} ref={rangeInputRef} onChange={(e) =>{onSliderChange(e.target.value); }}/>
+            <audio preload="auto" src={url} ref={audioRef} onLoadedData={onAudioload} ></audio>
+            <TimeBar>
+                <span className="audio_time start_time">{startTime}</span>
+                <span className="audio_time end_time">{endTime}</span>
+            </TimeBar>
+            <ControllBar>
+                {AudioControllButtons.map((btn,index) => {
+                    return index === 1 ? 
+                        <button onClick={btn.buttonHandler} className="startBtn" key={btn.buttonSrc[0]}> 
+                        {isPause ? 
+                            <img src={btn.buttonSrc[0]} alt={btn.alt}/> :
+                            <img style={{width:20}} src={btn.buttonSrc[1]} alt={btn.alt}/>
+                        }
+                        </button> :
+                        <button onClick={btn.buttonHandler} key={btn.buttonSrc[0]}>
+                            <img src={btn.buttonSrc[0]} alt={btn.alt}/>
+                        </button>
+                })}
+            </ControllBar>
+        </AudioBlock>
+    )
+}
+
 const AudioBlock = styled.div`
     position:absolute;
     width:100%;
@@ -54,50 +103,5 @@ const ControllBar = styled.div`
         }
     }
 `
-type TControllButton = {
-    buttonSrc: string[],
-    buttonHandler:() => void,
-    alt:string,
-}
-type AudioType = {
-    url:string,
-    currentRef:React.RefObject<HTMLAudioElement>,
-    rangeRef: React.RefObject<HTMLInputElement>,
-    value:number,
-    changeRange:(value:string) => void,
-    controllButton:TControllButton[],
-    rangeMouseUp:() => void,
-    loadedEndTime:() => void,
-    startTime:string,
-    endTime:string,
-    isPause:boolean,
-}
-const AudioPlayer = ({url,currentRef,rangeRef,value,changeRange,controllButton,rangeMouseUp, loadedEndTime, startTime, endTime,isPause}:AudioType) => {
-    
-  
-    return (
-        <AudioBlock>
-            <input id="range" min="0" max="1" step="any" className="range" type="range" onMouseUp={rangeMouseUp} value={value} ref={rangeRef} onChange={(e) =>{changeRange(e.target.value); }}/>
-            <audio preload="auto" src={url} ref={currentRef} onLoadedData={loadedEndTime} ></audio>
-            <TimeBar>
-                <span className="audio_time start_time">{startTime}</span>
-                <span className="audio_time end_time">{endTime}</span>
-            </TimeBar>
-            <ControllBar>
-                {controllButton.map((btn,index) => {
-                    return index === 1 ? 
-                        <button onClick={btn.buttonHandler} className="startBtn" key={btn.buttonSrc[0]}> {isPause ? 
-                            <img src={btn.buttonSrc[0]} alt={btn.alt}/> :
-                            <img style={{width:20}} src={btn.buttonSrc[1]} alt={btn.alt}/>
-                        }
-                        </button>
-                        :<button onClick={btn.buttonHandler} key={btn.buttonSrc[0]}>
-                            <img src={btn.buttonSrc[0]} alt={btn.alt}/>
-                        </button>
-                })}
-            </ControllBar>
-        </AudioBlock>
-    )
-}
 
 export default AudioPlayer;

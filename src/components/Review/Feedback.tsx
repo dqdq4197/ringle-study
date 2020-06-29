@@ -2,23 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import QuestionMark from '../Common/QuestionMark';
 
-const FeedbackBox = styled.div`
-    ${({theme}) => theme.flexBox};
-    font-size: 14px;
-    font-weight: 500;
-    color: ${({theme}) => theme.light1};
-    img {
-        width: 24px;
-        margin-right:3px;
 
-    }
-`
-const Line = styled.div`
-    margin-top: 10px;
-    width: 100%;
-    height: 1px;
-    background-color: #eaeaea;
-`
 
 const Feedback = () => {
     return (
@@ -37,3 +21,21 @@ const Feedback = () => {
 }
 
 export default Feedback;
+
+const FeedbackBox = styled.div`
+    ${({theme}) => theme.flexBox};
+    font-size: 14px;
+    font-weight: 500;
+    color: ${({theme}) => theme.light1};
+    img {
+        width: 24px;
+        margin-right:3px;
+
+    }
+`
+const Line = styled.div`
+    margin-top: 10px;
+    width: 100%;
+    height: 1px;
+    background-color: #eaeaea;
+`

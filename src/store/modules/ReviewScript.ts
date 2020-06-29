@@ -5,13 +5,13 @@ import {getScriptAPI} from '../apis/review';
 const GETSCRIPTS = 'script/GETSCRIPTS' as const;
 const SELECTSCRIPT = 'script/SELECTSCRIPT' as const;
 const CHANGERANGE = 'script/CHANGERANGE' as const;
-
+const MODIFYSCRIPT = 'script/MODIFYSCRIPT' as const;
 
 const getScript = (data:ScriptProps) => {
     return {
         type: GETSCRIPTS,
         payload: {
-            dialog:data.dialog_array,
+            scripts:data.dialog_array,
             url:data.url
         }
     }
@@ -31,10 +31,9 @@ export const changeRange = (time:number) => {
     }
 }
 
-
-// suggestion func 
-
-
+export const modifyScript = () => {
+    
+}
 
 type ScriptAction =
     | ReturnType<typeof getScript>
@@ -58,13 +57,10 @@ export type ScriptProps = {
     url:string,
 }
 
-
-
-
 type InitialType = {
-    dialog: DialogType[],
+    scripts: DialogType[],
     url:string,
-    seekTime:number,
+    audioCurrentTime:number,
     isStart:boolean,
 }
 
@@ -84,9 +80,9 @@ export const getScriptsThunk = ():ThunkAction<void,RootState,null,ScriptAction> 
 
 
 const initialState:InitialType = {
-    dialog:[],
+    scripts:[],
     url:"",
-    seekTime:0,
+    audioCurrentTime:0,
     isStart:false,
 }
 
@@ -95,18 +91,18 @@ export default function script(state:InitialType = initialState, action:ScriptAc
         case GETSCRIPTS :
             return {
                 ...state,
-                dialog:action.payload.dialog,
+                scripts:action.payload.scripts,
                 url:action.payload.url,
             }
         case SELECTSCRIPT :
             return {
                 ...state,
-                seekTime:action.payload,
+                audioCurrentTime:action.payload,
             }
         case CHANGERANGE :
             return {
                 ...state,
-                seekTime:action.payload,
+                audioCurrentTime:action.payload,
             }
         default : 
             return state
