@@ -16,7 +16,11 @@ const QuestionMark = ({desctiption,bottom}:MarkType) => {
     return (
         <QMark onClick={onToggleHandler}>
             ?
-            {toggle ? <DescriptionBox onClick={onToggleHandler} bottom={bottom}>{desctiption}</DescriptionBox> : null}
+            {toggle ?
+                <DescriptionBox onClick={onToggleHandler} bottom={bottom}>
+                    {desctiption}
+                </DescriptionBox> 
+            : null}
         </QMark>
     )
 

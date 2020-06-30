@@ -1,8 +1,14 @@
-import React,{useRef,useEffect} from 'react';
+import React,{ useRef, useEffect} from 'react';
 import styled,{css} from 'styled-components';
+import { FiEdit } from 'react-icons/fi';
+import { BsCheckBox } from "react-icons/bs";
+import {useDispatch, useSelector} from 'react-redux';
+import TextareaAutosize  from 'react-textarea-autosize';
+import {RootState} from '../../store/modules';
 import {DialogType} from '../../store/modules/ReviewScript';
 import QuestionMark from '../Common/QuestionMark';
 import storage from '../../lib/storage';
+import {editReady, editComplete} from '../../store/modules/ReviewScript';
 
 type StyledProps = {
     identity:number,
@@ -16,15 +22,18 @@ type ScriptProps = {
 
 const Scripts = ({scripts, onScriptClick, audioCurrentTime}:ScriptProps) => {
 
-    const DialogContainerRef = useRef<HTMLDivElement>(null) 
-    const chatContainerRef = useRef<HTMLDivElement>(null)
-    const autoInputRef = useRef<HTMLInputElement>(null)
+    const {editTarget,editContent} = useSelector((state:RootState) => state.script);
+    const dispatch = useDispatch();
 
+    const DialogContainerRef = useRef<HTMLDivElement>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const autoInputRef = useRef<HTMLInputElement>(null);
+    const editAreaRef = useRef<HTMLTextAreaElement>(null);
     const isAuto = storage.get('AutoScroll');
 
     useEffect(() => {
         if(autoInputRef.current && isAuto) 
-            autoInputRef.current.checked = true 
+            autoInputRef.current.checked = true;
     },[isAuto])
 
     useEffect(() => {
@@ -32,17 +41,29 @@ const Scripts = ({scripts, onScriptClick, audioCurrentTime}:ScriptProps) => {
             scrollMove()
         } 
     },[isAuto,audioCurrentTime])
-    
-    const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        storage.set("AutoScroll", event.target.checked);
-    }
 
     const scrollMove = () => {
         if(DialogContainerRef.current && chatContainerRef.current)
-        DialogContainerRef.current.scrollTo({
-          top: chatContainerRef.current.offsetTop- 380,
-          behavior: 'smooth'
-        });
+            DialogContainerRef.current.scrollTo({
+              top: chatContainerRef.current.offsetTop- 380,
+              behavior: 'smooth'
+            });
+    }
+
+    const handleCheckBoxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        storage.set("AutoScroll", event.target.checked);
+    }
+    
+    const handleEditReadyClick = (event:React.MouseEvent<HTMLDivElement, MouseEvent>, id:number, content:string) => {
+        event.stopPropagation();
+        dispatch(editReady(id,content));
+    }
+    
+    const handleEditedClick = (event:React.MouseEvent<HTMLDivElement, MouseEvent>, id:number) => {
+        event.stopPropagation();
+        if(editAreaRef.current)
+            dispatch(editComplete(id,editAreaRef.current.value));
+        dispatch(editReady(null, null))
     }
 
     return (
@@ -82,12 +103,32 @@ const Scripts = ({scripts, onScriptClick, audioCurrentTime}:ScriptProps) => {
                                     <img className="profile_picture" src={script.image_url} alt="tutor"/> 
                                 :   null
                                 }
-                                <div className="chat_text" style={{opacity:1}}>
-                                    {script.content}
-                                </div>
-                                <span className="time">
-                                    {script.formatted_time}
-                                </span>
+                                {script.id === editTarget ? 
+                                    <>
+                                        <TextareaAutosize className="edit_area" defaultValue={editContent || ""} ref={editAreaRef} onClick={(e) => e.stopPropagation()} />
+                                        <div className="util-container">
+                                            <div className="edit-script" onClick={(event) => handleEditedClick(event,script.id)}>
+                                                <BsCheckBox/>
+                                            </div>
+                                            <span className="time">
+                                                {script.formatted_time}
+                                            </span>
+                                        </div>
+                                    </>
+                                :   <>
+                                        <div className="chat_text" style={{opacity:1}}>
+                                            {script.content}
+                                        </div>
+                                        <div className="util-container">
+                                            <div className="edit-script" onClick={(event) => handleEditReadyClick(event,script.id,script.content)}>
+                                                <FiEdit/>
+                                            </div>
+                                            <span className="time">
+                                                {script.formatted_time}
+                                            </span>
+                                        </div>
+                                    </>
+                                }
                             </ChatContainer>
                         :   <ChatContainer key={script.id} onClick={() => onScriptClick(script.formatted_time_to_milliseconds)} identity={script.role} >
                                 {script.role ?
@@ -152,18 +193,15 @@ const ScriptContainer = styled.div`
         height: 1px;
         background-color: #eaeaea;
     }
-    .dialog_container {
-        
-    }
 `
 
 //중복
 const DialogContainer = styled.div`
-        height:calc(100% - 150px);
-        overflow-y:scroll;
-        &::-webkit-scrollbar {
-            display:none;
-        }
+    height:calc(100% - 150px);
+    overflow-y:scroll;
+    &::-webkit-scrollbar {
+        display:none;
+    }
         
 `
 const ChatContainer = styled.div`
@@ -206,6 +244,33 @@ const ChatContainer = styled.div`
         margin-left: 22px;
         font-size: 12px;
         line-height: 1.5;
+    }
+    .util-container {
+        height:38px;
+        
+    }
+    .edit_area {
+        width:100%;
+        margin-left: 22px;
+        border-radius:3px;
+        border:none;
+        padding:10px;
+        font-size:12px;
+        line-height:1.5;
+        font-weight:600;
+        border:1px solid rgba(0,0,0,.5);
+    }
+    .edit-script {
+        position: relative;
+        opacity: .5;
+        text-align: right;
+        top: 10px;
+        color: #49006c;
+        transition:.3s;
+        &:hover {
+            color:${({theme}) =>theme.accentColor};
+            opacity:1;
+        }
     }
     .time {
         margin-left: 10px;
