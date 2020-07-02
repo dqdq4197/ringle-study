@@ -2,15 +2,15 @@ import { ThunkAction } from 'redux-thunk';
 import {RootState} from '.';
 import {getScriptAPI} from '../apis/review';
 
-const GETSCRIPTS = 'script/GETSCRIPTS' as const;
-const SELECTSCRIPT = 'script/SELECTSCRIPT' as const;
-const CHANGERANGE = 'script/CHANGERANGE' as const;
-const EDITREADY = 'script/EDITREADY' as const;
-const EDITCOMPLETE = 'script/EDITCOMPLETE' as const;
+const GET_SCRIPTS = 'script/GET_SCRIPTS' as const;
+const SELECT_SCRIPT = 'script/SELECT_SCRIPT' as const;
+const UPDATE_AUDIO_CURRENTTIME = 'script/UPDATE_AUDIO_CURRENTTIME' as const;
+const EDIT_READY = 'script/EDIT_READY' as const;
+const EDIT_COMPLETE = 'script/EDIT_COMPLETE' as const;
 
 const getScript = (data:ScriptProps) => {
     return {
-        type: GETSCRIPTS,
+        type: GET_SCRIPTS,
         payload: {
             scripts:data.dialog_array,
             url:data.url
@@ -20,21 +20,21 @@ const getScript = (data:ScriptProps) => {
 
 export const selectScript = (time:number) => {
     return {
-        type: SELECTSCRIPT,
+        type: SELECT_SCRIPT,
         payload: time,
     }
 }
 
-export const changeRange = (time:number) => {
+export const updateAudioCurrentTime = (time:number) => {
     return {
-        type: CHANGERANGE,
+        type: UPDATE_AUDIO_CURRENTTIME,
         payload: time,
     }
 }
 
 export const editReady= (id:number|null,content:string | null) => {
     return {
-        type: EDITREADY,
+        type: EDIT_READY,
         payload: {
             id,
             content,
@@ -44,7 +44,7 @@ export const editReady= (id:number|null,content:string | null) => {
 
 export const editComplete = (id:number,content:string) => {
     return {
-        type: EDITCOMPLETE,
+        type: EDIT_COMPLETE,
         payload: {
             id,
             content
@@ -56,7 +56,7 @@ export const editComplete = (id:number,content:string) => {
 type ScriptAction =
     | ReturnType<typeof getScript>
     | ReturnType<typeof selectScript>
-    | ReturnType<typeof changeRange>
+    | ReturnType<typeof updateAudioCurrentTime>
     | ReturnType<typeof editReady>
     | ReturnType<typeof editComplete>
 
@@ -114,29 +114,29 @@ const initialState:InitialType = {
 
 export default function script(state:InitialType = initialState, action:ScriptAction) {
     switch (action.type) {
-        case GETSCRIPTS :
+        case GET_SCRIPTS :
             return {
                 ...state,
                 scripts:action.payload.scripts,
                 url:action.payload.url,
             }
-        case SELECTSCRIPT :
+        case SELECT_SCRIPT :
             return {
                 ...state,
                 audioCurrentTime:action.payload,
             }
-        case CHANGERANGE :
+        case UPDATE_AUDIO_CURRENTTIME :
             return {
                 ...state,
                 audioCurrentTime:action.payload,
             }
-        case EDITREADY :
+        case EDIT_READY :
             return {
                 ...state,
                 editTarget:action.payload.id,
                 editContent:action.payload.content,
             }
-        case EDITCOMPLETE :
+        case EDIT_COMPLETE :
             const index = state.scripts.findIndex((script) => script.id === action.payload.id);
             const piece = state.scripts[index];
             piece.content = action.payload.content;

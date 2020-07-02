@@ -1,50 +1,127 @@
-import React from 'react';
+import React,{useState, useEffect} from 'react';
 import styled from 'styled-components'; 
+import {updateAudioCurrentTime} from '../../store/modules/ReviewScript';
+import {useDispatch} from 'react-redux';
 
-
-type TControllButton = {
-    buttonSrc: string[],
-    buttonHandler:() => void,
-    alt:string,
-}
 type AudioType = {
     url:string,
     audioRef:React.RefObject<HTMLAudioElement>,
     rangeInputRef: React.RefObject<HTMLInputElement>,
-    value:number,
-    startTime:string,
-    endTime:string,
-    isPause:boolean,
-    AudioControllButtons:TControllButton[],
-    onSliderChange:(value:string) => void,
-    onSliderMouseUp:() => void,
-    onAudioload:() => void,
 }
 
-const AudioPlayer = ({ url, audioRef, rangeInputRef, value, startTime,  endTime, isPause,  AudioControllButtons, onSliderMouseUp,  onAudioload,  onSliderChange}:AudioType) => {
+const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
     
-  
+    const dispatch = useDispatch();
+    
+    const [currentTime, setCurrentTime] = useState('00:00');
+    const [endTime, setEndTime] = useState("00:00");
+    const [render, setRender] = useState(true);
+    const [isPause, setIsPause] = useState(true);
+    const [isRepeat, setIsRepeat] = useState(0);
+
+    useEffect(() => {
+        if(rangeInputRef.current){
+            setCurrentTime(rangeInputRef.current.value)
+        }
+    },[audioRef.current?.currentTime])
+
+    const formatTime = (time:number) => {
+        let minutes, seconds;
+        minutes = Math.floor(time / 60);
+        minutes = (minutes >= 10) ? minutes : "0" + minutes;
+        seconds = Math.floor(time % 60);
+        seconds = (seconds >= 10) ? seconds : "0" + seconds;
+        return minutes + ":" + seconds;
+    }
+
+    const handleAudioLoad = () => {
+        if(audioRef.current) {
+            setEndTime(formatTime(audioRef.current.duration));
+        }
+    }
+
+    const handleSliderMouseUp = () => {
+        if(audioRef.current && rangeInputRef.current) {
+            audioRef.current.currentTime = Number(rangeInputRef.current.value) * audioRef.current.duration;
+            dispatch(updateAudioCurrentTime(Number(rangeInputRef.current.value) * audioRef.current.duration));
+        }
+    }
+
+    const updateAlltime = (time:number) => {
+        if(audioRef.current && rangeInputRef.current) {
+            dispatch(updateAudioCurrentTime(audioRef.current.currentTime));
+            rangeInputRef.current.value = time.toString();
+        }
+    }
+
+    const handlePrevButtonClick = () => {
+        if(audioRef.current && rangeInputRef.current) {
+            audioRef.current.currentTime -= 5;
+            updateAlltime(1 / audioRef.current.duration * audioRef.current.currentTime);
+            setRender(!render);
+        }
+    }
+
+    const handleStartButtonClick = () => {
+        let audio = audioRef.current;
+        if(audio) {
+            if(!isPause) {
+                audio.pause();
+                if(isRepeat) 
+                    clearInterval(isRepeat)
+                setIsPause(true);
+            } else {
+                audio.play();
+                dispatch(updateAudioCurrentTime(audio.currentTime))
+                setIsRepeat(setInterval(() => {
+                    if(audio) 
+                        updateAlltime(1 / audio.duration * audio.currentTime)
+                }, 1000));
+                setIsPause(false);
+            }
+        }
+    }
+
+    const handleNextButtonClick = () => {
+        if(audioRef.current && rangeInputRef.current) {
+            audioRef.current.currentTime += 5;
+            updateAlltime(1 / audioRef.current.duration * audioRef.current.currentTime);
+            setRender(!render)
+        }
+    }
+
+    
+
     return (
         <AudioBlock>
-            <input id="range" min="0" max="1" step="any" className="range" type="range" onMouseUp={onSliderMouseUp} value={value} ref={rangeInputRef} onChange={(e) =>{onSliderChange(e.target.value); }}/>
-            <audio preload="auto" src={url} ref={audioRef} onLoadedData={onAudioload} ></audio>
+            <input id="range" min="0" max="1" step="any" defaultValue="0" className="range" type="range" 
+                onMouseUp={handleSliderMouseUp} 
+                onChange={(event) => setCurrentTime((event.target as HTMLInputElement).value)} 
+                ref={rangeInputRef}
+            />
+            <audio preload="auto" src={url} ref={audioRef} onLoadedData={handleAudioLoad} ></audio>
             <TimeBar>
-                <span className="audio_time start_time">{startTime}</span>
+                <span className="audio_time start_time">
+                    {audioRef.current?.duration ? 
+                        formatTime(Number(currentTime) * audioRef.current.duration) 
+                    :   "00:00"
+                    }
+                </span>
                 <span className="audio_time end_time">{endTime}</span>
             </TimeBar>
             <ControllBar>
-                {AudioControllButtons.map((btn,index) => {
-                    return index === 1 ? 
-                        <button onClick={btn.buttonHandler} className="startBtn" key={btn.buttonSrc[0]}> 
-                        {isPause ? 
-                            <img src={btn.buttonSrc[0]} alt={btn.alt}/> :
-                            <img style={{width:20}} src={btn.buttonSrc[1]} alt={btn.alt}/>
-                        }
-                        </button> :
-                        <button onClick={btn.buttonHandler} key={btn.buttonSrc[0]}>
-                            <img src={btn.buttonSrc[0]} alt={btn.alt}/>
-                        </button>
-                })}
+                <button onClick={handlePrevButtonClick}>
+                    <img src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-prev-5s.png" alt="Prev"/>
+                </button>
+                <button className="startBtn" onClick={handleStartButtonClick}>
+                    {isPause ? 
+                        <img src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-play.png" alt="Play"/>
+                    :   <img style={{width:20}} src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-pause.png" alt="Stop"/>
+                    }
+                </button>
+                <button onClick={handleNextButtonClick}>
+                    <img src="https://ringleimageassets.s3.ap-northeast-2.amazonaws.com/common/icon/ic-next-5s.png" alt="Next"/>
+                </button>
             </ControllBar>
         </AudioBlock>
     )
