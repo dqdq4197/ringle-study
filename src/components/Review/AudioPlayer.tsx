@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from 'react';
+import React,{useState, useEffect, useRef} from 'react';
 import styled from 'styled-components'; 
 import {updateAudioCurrentTime} from '../../store/modules/ReviewScript';
 import {useDispatch} from 'react-redux';
@@ -15,9 +15,11 @@ const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
     
     const [currentTime, setCurrentTime] = useState('00:00');
     const [endTime, setEndTime] = useState("00:00");
-    const [render, setRender] = useState(true);
     const [isPause, setIsPause] = useState(true);
     const [isRepeat, setIsRepeat] = useState(0);
+    const [render, setRender] = useState(false);
+
+    const isChange = useRef(false);
 
     useEffect(() => {
         if(rangeInputRef.current){
@@ -40,25 +42,32 @@ const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
         }
     }
 
+    const handleSliderMouseDown = () => {
+        isChange.current = true;
+        setRender(!render);
+    }
+    
     const handleSliderMouseUp = () => {
         if(audioRef.current && rangeInputRef.current) {
             audioRef.current.currentTime = Number(rangeInputRef.current.value) * audioRef.current.duration;
             dispatch(updateAudioCurrentTime(Number(rangeInputRef.current.value) * audioRef.current.duration));
+            isChange.current = false;
+            setRender(!render);
         }
     }
 
     const updateAlltime = (time:number) => {
         if(audioRef.current && rangeInputRef.current) {
             dispatch(updateAudioCurrentTime(audioRef.current.currentTime));
-            rangeInputRef.current.value = time.toString();
+            if(!isChange.current)
+                rangeInputRef.current.value = time.toString();
         }
     }
-
+    
     const handlePrevButtonClick = () => {
         if(audioRef.current && rangeInputRef.current) {
             audioRef.current.currentTime -= 5;
             updateAlltime(1 / audioRef.current.duration * audioRef.current.currentTime);
-            setRender(!render);
         }
     }
 
@@ -86,7 +95,6 @@ const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
         if(audioRef.current && rangeInputRef.current) {
             audioRef.current.currentTime += 5;
             updateAlltime(1 / audioRef.current.duration * audioRef.current.currentTime);
-            setRender(!render)
         }
     }
 
@@ -95,6 +103,7 @@ const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
     return (
         <AudioBlock>
             <input id="range" min="0" max="1" step="any" defaultValue="0" className="range" type="range" 
+                onMouseDown={handleSliderMouseDown}
                 onMouseUp={handleSliderMouseUp} 
                 onChange={(event) => setCurrentTime((event.target as HTMLInputElement).value)} 
                 ref={rangeInputRef}

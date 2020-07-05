@@ -17,12 +17,11 @@ type StyledProps = {
 type ScriptProps = {
     scripts:DialogType[],
     onScriptClick:(time:number) => void,
-    audioCurrentTime:number,
 }
 
-const Scripts = ({scripts, onScriptClick, audioCurrentTime}:ScriptProps) => {
+const Scripts = ({scripts, onScriptClick}:ScriptProps) => {
 
-    const {editTarget,editContent} = useSelector((state:RootState) => state.script);
+    const {editTarget,editContent,audioCurrentTime} = useSelector((state:RootState) => state.script);
     const dispatch = useDispatch();
 
     const DialogContainerRef = useRef<HTMLDivElement>(null);

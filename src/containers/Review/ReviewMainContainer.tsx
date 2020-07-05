@@ -11,7 +11,7 @@ import {RootState} from '../../store/modules/index';
 
 const ReviewMainContainer = () => {
 
-    const {scripts, url, audioCurrentTime} = useSelector((state:RootState) =>  state.script);
+    const {scripts, url} = useSelector((state:RootState) =>  state.script);
     const dispatch = useDispatch();
 
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -37,7 +37,6 @@ const ReviewMainContainer = () => {
             <MainWrap>
                 <Scripts 
                     scripts={scripts}
-                    audioCurrentTime={audioCurrentTime}
                     onScriptClick={handleScriptClick}
                 />
                 <Suggestions/>
