@@ -17,9 +17,8 @@ const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
     const [endTime, setEndTime] = useState("00:00");
     const [isPause, setIsPause] = useState(true);
     const [isRepeat, setIsRepeat] = useState(0);
-    const [render, setRender] = useState(false);
 
-    const isChange = useRef(false);
+    const isMouseDown = useRef(false);
 
     useEffect(() => {
         if(rangeInputRef.current){
@@ -43,24 +42,22 @@ const AudioPlayer = ({ url, audioRef, rangeInputRef}:AudioType) => {
     }
 
     const handleSliderMouseDown = () => {
-        isChange.current = true;
-        setRender(!render);
+        isMouseDown.current = true;
     }
     
     const handleSliderMouseUp = () => {
         if(audioRef.current && rangeInputRef.current) {
             audioRef.current.currentTime = Number(rangeInputRef.current.value) * audioRef.current.duration;
             dispatch(updateAudioCurrentTime(Number(rangeInputRef.current.value) * audioRef.current.duration));
-            isChange.current = false;
-            setRender(!render);
+            isMouseDown.current = false;
         }
     }
 
     const updateAlltime = (time:number) => {
         if(audioRef.current && rangeInputRef.current) {
-            dispatch(updateAudioCurrentTime(audioRef.current.currentTime));
-            if(!isChange.current)
+            if(!isMouseDown.current)
                 rangeInputRef.current.value = time.toString();
+            dispatch(updateAudioCurrentTime(audioRef.current.currentTime));
         }
     }
     
